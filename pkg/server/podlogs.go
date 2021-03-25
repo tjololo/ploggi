@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/tjololo/ploggi/pkg/api/ploggi"
-	"google.golang.org/grpc"
 )
 
 type PodLogServer struct {
@@ -12,6 +11,6 @@ type PodLogServer struct {
 	
 }
 
-func (s *PodLogServer) GetLog(ctx context.Context, in *ploggi.Pod, opts ...grpc.CallOption) (*ploggi.PodLog, error) {
-	return nil, nil
+func (s *PodLogServer) GetLog(ctx context.Context, in *ploggi.Pod) (*ploggi.PodLog, error) {
+	return &ploggi.PodLog{Log: "this would be the logs"}, nil
 }

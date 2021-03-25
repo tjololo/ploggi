@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	address     = "localhost:50051"
+	address     = "localhost:8080"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.GetLog(ctx, &pb.Pod{Podname: "test", Namespace: "default", Containername: "deployment"})
+	r, err := c.GetLog(ctx, &pb.Pod{Podname: "ploggi-5c748cdcfd-mq26k", Namespace: "default", Containername: "ploggi"})
 	if err != nil {
 		log.Fatalf("could not get log: %v", err)
 	}

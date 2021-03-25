@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: log-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods","pods/log"]
+  verbs: ["get", "watch","list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ploggi
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-logs
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: ploggi
+  namespace: default
+roleRef:
+  kind: Role
+  name: log-reader
+  apiGroup: rbac.authorization.k8s.io

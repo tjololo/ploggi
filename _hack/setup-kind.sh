@@ -38,3 +38,6 @@ data:
     host: "localhost:${reg_port}"
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
+
+dir_path=$(dirname $0)
+kubectl apply -f $dir_path/resources

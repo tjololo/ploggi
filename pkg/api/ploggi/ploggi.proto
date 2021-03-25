@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package ploggi;
+
+option go_package = "github.com/tjololo/ploggi/pkg/api/ploggi";
+
+service PodLogs {
+    rpc GetLog (Pod) returns (PodLog);
+}
+
+message Pod {
+    string podname = 1;
+    string namespace = 2;
+    string containername = 3;
+}
+
+message PodLog {
+    string log = 1;
+}

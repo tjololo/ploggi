@@ -14,27 +14,11 @@ type Streamer struct {
 }
 
 func (s Streamer) StreamPodLogs(containerName, podname, namespace string, ctx context.Context) (io.ReadCloser, error) {
-	tailCount := int64(100)
-	podLogOptions := corev1.PodLogOptions{
-		Container: containerName,
-		Follow:    true,
-		TailLines: &tailCount,
-	}
-
-	podLogRrequest := s.Clientset.CoreV1().Pods(namespace).GetLogs(podname, &podLogOptions)
-	return podLogRrequest.Stream(ctx)
+	return s.getLogReader(ctx, namespace, podname, containerName, true)
 }
 
 func (s Streamer) PodLogs(containerName, podname, namespace string, ctx context.Context) (string, error) {
-	tailCount := int64(1000)
-	podLogOptions := corev1.PodLogOptions{
-		Container: containerName,
-		Follow:    false,
-		TailLines: &tailCount,
-	}
-
-	podLogRrequest := s.Clientset.CoreV1().Pods(namespace).GetLogs(podname, &podLogOptions)
-	podLogs, err := podLogRrequest.Stream(ctx)
+	podLogs, err := s.getLogReader(ctx, namespace, podname, containerName, false)
 	if err != nil {
         return "", err
     }
@@ -48,4 +32,16 @@ func (s Streamer) PodLogs(containerName, podname, namespace string, ctx context.
     str := buf.String()
 
     return str, nil
+}
+
+func (s Streamer) getLogReader(ctx context.Context, namespace, podname, containername string, follow bool) (io.ReadCloser, error) {
+	tailCount := int64(100)
+	podLogOptions := corev1.PodLogOptions{
+		Container: containername,
+		Follow:    follow,
+		TailLines: &tailCount,
+	}
+
+	podLogRrequest := s.Clientset.CoreV1().Pods(namespace).GetLogs(podname, &podLogOptions)
+	return podLogRrequest.Stream(ctx)
 }

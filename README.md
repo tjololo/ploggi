@@ -7,6 +7,8 @@ The server has two rpc:
     rpc GetLog (Pod) returns (PodLog);
     rpc StreamLog (Pod) returns (stream PodLog);
 ```
+[Proto file](pkg/api/ploggi/ploggi.proto)
+
 
 _hack/example/ contains example clients for both rpcs
 

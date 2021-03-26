@@ -6,6 +6,7 @@ option go_package = "github.com/tjololo/ploggi/pkg/api/ploggi";
 
 service PodLogs {
     rpc GetLog (Pod) returns (PodLog);
+    rpc StreamLog (Pod) returns (stream PodLog);
 }
 
 message Pod {

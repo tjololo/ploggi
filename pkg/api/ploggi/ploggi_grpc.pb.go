@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PodLogsClient interface {
 	GetLog(ctx context.Context, in *Pod, opts ...grpc.CallOption) (*PodLog, error)
+	StreamLog(ctx context.Context, in *Pod, opts ...grpc.CallOption) (PodLogs_StreamLogClient, error)
 }
 
 type podLogsClient struct {
@@ -38,11 +39,44 @@ func (c *podLogsClient) GetLog(ctx context.Context, in *Pod, opts ...grpc.CallOp
 	return out, nil
 }
 
+func (c *podLogsClient) StreamLog(ctx context.Context, in *Pod, opts ...grpc.CallOption) (PodLogs_StreamLogClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PodLogs_ServiceDesc.Streams[0], "/ploggi.PodLogs/StreamLog", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &podLogsStreamLogClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PodLogs_StreamLogClient interface {
+	Recv() (*PodLog, error)
+	grpc.ClientStream
+}
+
+type podLogsStreamLogClient struct {
+	grpc.ClientStream
+}
+
+func (x *podLogsStreamLogClient) Recv() (*PodLog, error) {
+	m := new(PodLog)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PodLogsServer is the server API for PodLogs service.
 // All implementations must embed UnimplementedPodLogsServer
 // for forward compatibility
 type PodLogsServer interface {
 	GetLog(context.Context, *Pod) (*PodLog, error)
+	StreamLog(*Pod, PodLogs_StreamLogServer) error
 	mustEmbedUnimplementedPodLogsServer()
 }
 
@@ -52,6 +86,9 @@ type UnimplementedPodLogsServer struct {
 
 func (UnimplementedPodLogsServer) GetLog(context.Context, *Pod) (*PodLog, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLog not implemented")
+}
+func (UnimplementedPodLogsServer) StreamLog(*Pod, PodLogs_StreamLogServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamLog not implemented")
 }
 func (UnimplementedPodLogsServer) mustEmbedUnimplementedPodLogsServer() {}
 
@@ -84,6 +121,27 @@ func _PodLogs_GetLog_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PodLogs_StreamLog_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Pod)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PodLogsServer).StreamLog(m, &podLogsStreamLogServer{stream})
+}
+
+type PodLogs_StreamLogServer interface {
+	Send(*PodLog) error
+	grpc.ServerStream
+}
+
+type podLogsStreamLogServer struct {
+	grpc.ServerStream
+}
+
+func (x *podLogsStreamLogServer) Send(m *PodLog) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // PodLogs_ServiceDesc is the grpc.ServiceDesc for PodLogs service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +154,12 @@ var PodLogs_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PodLogs_GetLog_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamLog",
+			Handler:       _PodLogs_StreamLog_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "pkg/api/ploggi/ploggi.proto",
 }

@@ -5,8 +5,8 @@ metadata:
   name: log-reader
 rules:
 - apiGroups: [""]
-  resources: ["pods","pods/log"]
-  verbs: ["get", "watch","list"]
+  resources: ["pods/log"]
+  verbs: ["get"]
 ---
 apiVersion: v1
 kind: ServiceAccount

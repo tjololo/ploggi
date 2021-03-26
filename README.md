@@ -34,13 +34,18 @@ _hack/example/ contains example clients for both rpcs
    ```
    make apply-kind
    ```
+   
+5. Forward port to service in kind cluster
+   ```
+   kubectl port-forward svc/ploggi 8080:8080
+   ```
 
-5. Start stream client
+6. Start stream client
    ```
    go run _hack/examples/ploggi_stream_client/stream.go <ploggi-pod-name> ploggi
    ```
 
-6. Execute get client
+7. Execute get client
    ```
    go run _hack/examples/ploggi_get_client/get.go <ploggi-pod-name> ploggi
    ```

@@ -4,7 +4,7 @@ pb-client:
 local-image:
 	ko publish --local -B .
 
-push-kind:
+push-local:
 	docker tag ko.local/ploggi:latest localhost:5000/ploggi:latest
 	docker push localhost:5000/ploggi:latest
 
